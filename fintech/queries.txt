@@ -1,0 +1,47 @@
+Aggregation Queries :
+
+1. Calculate the total debit and credit amounts for each user:
+
+db.transactions.aggregate([
+    {
+        $group:{
+            _id:"$userId",
+            totalDebit:{
+                $sum:{$cond:[{$eq:["$type", "debit"]}, "$amount", 0]}
+            },
+            totalCredit:{
+                $sum:{$cond:[{$eq:["$type", "credit"]}, "$amount", 0]}
+            }
+        }
+    }
+])
+
+2. Find the user with the highest total credit amount:
+
+db.transactions.aggregate([
+    {
+        $group:{
+            _id:"$userId",
+            totalCredit:{
+                $sum:{$cond:[{$eq:["$type", "credit"]}, "$amount", 0]}
+            }
+        }
+    },
+    {
+        $sort:{totalCredit:-1}
+    },
+    {
+        $limit:1
+    }
+])
+
+3. Calculate the average transaction amount for each month:
+
+db.transactions.aggregate([
+    {
+        $project:{
+            _id:{$month:"$timestamp"},
+            avgAmount:{$avg:"$amount"}
+        }
+    }
+])

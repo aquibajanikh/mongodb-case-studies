@@ -1,0 +1,55 @@
+Aggregation Queries :
+
+1. Find users with the highest number of followers
+
+db.users.aggregate([
+    {
+        $project:{
+            username:1,
+            numFollowers:{$size:"$followers"}
+        }
+    },
+    {
+        $sort:{
+            numFollowers:-1
+        }
+    },
+    {
+        $limit:1
+    }
+])
+
+2. Calculate the average number of likes per post
+
+db.users.aggregate([
+    {
+        $unwind:"$posts"
+    },
+    {
+        $group:{
+            _id:"$_id",
+            avgLikes:{$avg:"$posts.likes"}
+        }
+    }
+])
+
+3. Count the total number of comments across all posts
+
+db.users.aggregate([
+    {
+        $project:{
+            _id:0,
+            numComments:{
+                $size:{
+                    $reduce:{
+                        input:"$posts.comments",
+                        initialValue:[],
+                        in:{
+                            $concatArrays:["$$value","$$this"]
+                        }
+                    }
+                }
+            }
+        }
+    },
+])

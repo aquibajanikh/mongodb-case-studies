@@ -1,0 +1,2 @@
+Query : Take the rider's latitude and longitude, along with a collection of documents with the location data of drivers, to provide a list of drivers within a hailing range of 2000 meters.​
+

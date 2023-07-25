@@ -1,0 +1,76 @@
+Aggregation Queries:
+
+1. Get the average price of products in the "Electronics" category
+
+db.products.aggregate([
+    {
+        $match:{category:"Electronics"}
+    },
+    {
+        $group:{
+            _id:null,
+            avgPrice:{$avg:"$price"}
+        }
+    }
+])
+
+2. Count the total number of orders
+
+db.orders.aggregate([
+    {
+        $count:"totalOrders"
+    }
+])
+
+3. Get the top 3 customers with the highest total order amount
+
+db.orders.aggregate([
+    {
+        $group:{
+            _id:"$customerId",
+            totalAmount:{$sum:"$totalAmount"}
+        }
+    },
+    {
+        $sort:{totalAmount:-1}
+    },
+    {
+        $limit:3
+    }
+])
+
+
+4. Calculate the average rating for each product
+
+db.products.aggregate([
+    {
+        $project:{
+            name:1,
+            avgRating:{$avg:"$ratings"}
+        }
+    }
+])
+
+5. Get the total revenue for each category
+
+db.orders.aggregate([
+    {
+        $lookup:{
+            from:"products",
+            localField:"products.productId",
+            foreignField:"_id",
+            as:"productDetails"
+        }
+    },
+    {
+        $unwind:"$productDetails"
+    },
+    {
+        $group:{
+            _id:"$productDetails.category",
+            totalRevenue : {
+                $sum:{$multiply:["$productDetails.price", "$productDetails.quantity"]}
+            }
+        }
+    }  
+])
